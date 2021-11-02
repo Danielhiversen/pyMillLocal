@@ -28,7 +28,7 @@ jobs:
       - name: Install depencency
         run: |
             pip install dlint flake8 flake8-bandit flake8-bugbear flake8-deprecated flake8-executable isort pylint
-            python setup.py install
+            pip install -r requirements.txt
       - name: isort
         if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
