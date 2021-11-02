@@ -10,11 +10,10 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
-          - "3.8"
           - "3.9"
+          - "3.10"
     env:
-      SRC_FOLDER: TEMPLATE_CHANGE_ME
+      SRC_FOLDER: mill_local
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
