@@ -62,7 +62,7 @@ class Mill:
         """Get heater status."""
         return await self._request("control-status")
 
-    async def _request(self, command, retry=3):
+    async def _request(self, command):
         try:
             with async_timeout.timeout(self._timeout):
                 async with self.websession.get(
@@ -76,7 +76,7 @@ class Mill:
                         )
                         return None
                     res = await response.json()
-                    if res["status"] == "ok":
+                    if res["status"] != "ok":
                         _LOGGER.error("Request %s failed: %s", command, res)
                         return None
                     return res
