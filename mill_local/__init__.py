@@ -25,7 +25,7 @@ class Mill:
         }
         with async_timeout.timeout(self._timeout):
             async with self.websession.post(
-                f"{self._url}/control-status",
+                f"{self._url}/set-temperature",
                 payload=payload,
             ) as response:
                 _LOGGER.debug("Heater response %s", response.status)
@@ -55,11 +55,18 @@ class Mill:
                 return response.status
 
     async def get_status(self):
+        """Get heater control status."""
+        return await self._request("status")
+
+    async def get_control_status(self):
         """Get heater status."""
+        return await self._request("control-status")
+
+    async def _request(self, command, retry=3):
         try:
             with async_timeout.timeout(self._timeout):
                 async with self.websession.get(
-                    f"{self._url}/control-status",
+                    f"{self._url}/{command}",
                 ) as response:
                     if response.status != 200:
                         _LOGGER.error(
@@ -67,7 +74,11 @@ class Mill:
                             response.status,
                             response.reason,
                         )
-                        return None, None
-                    return await response.json()
+                        return None
+                    res = await response.json()
+                    if res["status"] == "ok":
+                        _LOGGER.error("Request %s failed: %s", command, res)
+                        return None
+                    return res
         except asyncio.TimeoutError:
             return None
