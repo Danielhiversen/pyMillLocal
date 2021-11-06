@@ -1,5 +1,6 @@
 """Local support for Mill wifi-enabled home heaters."""
 import asyncio
+import json
 import logging
 
 import async_timeout
@@ -14,8 +15,19 @@ class Mill:
         """Init Mill data handler."""
         self.device_ip = device_ip
         self.websession = websession
-        self._url = "http://" + device_ip + "/"
+        self.url = "http://" + device_ip
         self._timeout = timeout
+        self._status = {}
+
+    @property
+    def version(self):
+        """Return version."""
+        return self._status.get("version", "")
+
+    @property
+    def name(self):
+        """Return name."""
+        return self._status.get("name", "")
 
     async def set_target_temperature(self, target_temperature):
         """Set target temperature."""
@@ -25,8 +37,8 @@ class Mill:
         }
         with async_timeout.timeout(self._timeout):
             async with self.websession.post(
-                f"{self._url}/set-temperature",
-                payload=payload,
+                f"{self.url}/set-temperature",
+                data=json.dumps(payload),
             ) as response:
                 _LOGGER.debug("Heater response %s", response.status)
                 if response.status != 200:
@@ -42,7 +54,7 @@ class Mill:
         payload = {"mode": "Control individually"}
         with async_timeout.timeout(self._timeout):
             async with self.websession.post(
-                f"{self._url}/operation-mode",
+                f"{self.url}/operation-mode",
                 payload=payload,
             ) as response:
                 _LOGGER.debug("Heater response %s", response.status)
@@ -56,21 +68,23 @@ class Mill:
 
     async def get_status(self):
         """Get heater control status."""
-        return await self._request("status")
+        self._status = await self._request("status")
+        return self._status
 
     async def get_control_status(self):
         """Get heater status."""
         return await self._request("control-status")
 
-    async def _request(self, command):
+    async def _request(self, command, retry=3):
         try:
             with async_timeout.timeout(self._timeout):
                 async with self.websession.get(
-                    f"{self._url}/{command}",
+                    f"{self.url}/{command}",
                 ) as response:
                     if response.status != 200:
                         _LOGGER.error(
-                            "Failed to get status %s %s",
+                            "Failed to get %s %s %s",
+                            command,
                             response.status,
                             response.reason,
                         )
