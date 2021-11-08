@@ -16,7 +16,7 @@ setup(
     install_requires=install_requires,
     version="0.0.1",
     description="A python3 library to communicate with Mill",
-    python_requires=">=3.9.0",
+    python_requires=">=3.8.0",
     author="Daniel Hjelseth Høyer",
     author_email="mail@dahoiv.net",
     url="https://github.com/Danielhiversen/pyMillLocal",
