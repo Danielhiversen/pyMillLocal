@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 
+import aiohttp.client_exceptions
 import async_timeout
 
 _LOGGER = logging.getLogger(__name__)
@@ -13,9 +14,9 @@ class Mill:
 
     def __init__(self, device_ip, websession, timeout=15):
         """Init Mill data handler."""
-        self.device_ip = device_ip
+        self.device_ip = device_ip.replace("http://", "").replace("/", "").strip()
         self.websession = websession
-        self.url = "http://" + device_ip
+        self.url = "http://" + self.device_ip
         self._timeout = timeout
         self._status = {}
 
@@ -68,7 +69,16 @@ class Mill:
 
     async def get_status(self):
         """Get heater control status."""
-        self._status = await self._request("status")
+        for k in range(3, -1, -1):
+            try:
+                self._status = await self._request("status")
+            except aiohttp.client_exceptions.ClientError:
+                if k > 0:
+                    _LOGGER.warning("Failed to get status, retrying")
+                else:
+                    raise
+            else:
+                break
         return self._status
 
     async def get_control_status(self):
