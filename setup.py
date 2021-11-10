@@ -14,7 +14,7 @@ setup(
     name="mill_local",
     packages=["mill_local"],
     install_requires=install_requires,
-    version="0.0.2",
+    version="0.0.3",
     description="A python3 library to communicate with Mill",
     python_requires=">=3.8.0",
     author="Daniel Hjelseth Høyer",
