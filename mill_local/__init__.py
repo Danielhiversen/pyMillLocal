@@ -67,42 +67,38 @@ class Mill:
                     )
                 return response.status
 
+    async def connect(self):
+        """Get heater status."""
+        return await self.get_status()
+
     async def get_status(self):
-        """Get heater control status."""
+        """Get heater status."""
         for k in range(3, -1, -1):
             try:
                 self._status = await self._request("status")
-            except aiohttp.client_exceptions.ClientError:
+            except (aiohttp.client_exceptions.ClientError, asyncio.TimeoutError):
                 if k > 0:
+                    await asyncio.sleep(1)
                     _LOGGER.warning("Failed to get status, retrying")
                 else:
-                    raise
+                    _LOGGER.error("Failed to get status", exc_info=True)
+                    return None
             else:
                 break
         return self._status
 
-    async def get_control_status(self):
+    async def fetch_heater_and_sensor_data(self):
         """Get heater status."""
         return await self._request("control-status")
 
     async def _request(self, command):
-        try:
-            with async_timeout.timeout(self._timeout):
-                async with self.websession.get(
-                    f"{self.url}/{command}",
-                ) as response:
-                    if response.status != 200:
-                        _LOGGER.error(
-                            "Failed to get %s %s %s",
-                            command,
-                            response.status,
-                            response.reason,
-                        )
-                        return None
-                    res = await response.json()
-                    if res["status"] != "ok":
-                        _LOGGER.error("Request %s failed: %s", command, res)
-                        return None
-                    return res
-        except asyncio.TimeoutError:
-            return None
+        with async_timeout.timeout(self._timeout):
+            async with self.websession.get(
+                f"{self.url}/{command}",
+                    raise_for_status=True
+            ) as response:
+                res = await response.json()
+                if res["status"] != "ok":
+                    _LOGGER.error("Request %s failed: %s", command, res)
+                    return None
+                return res
