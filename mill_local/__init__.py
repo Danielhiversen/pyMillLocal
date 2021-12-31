@@ -30,6 +30,11 @@ class Mill:
         """Return name."""
         return self._status.get("name", "")
 
+    @property
+    def mac_address(self):
+        """Return mac address."""
+        return self._status.get("mac_address")
+
     async def set_target_temperature(self, target_temperature):
         """Set target temperature."""
         payload = {
