@@ -78,18 +78,11 @@ class Mill:
 
     async def get_status(self):
         """Get heater status."""
-        for k in range(3, -1, -1):
-            try:
-                self._status = await self._request("status")
-            except (aiohttp.client_exceptions.ClientError, asyncio.TimeoutError):
-                if k > 0:
-                    await asyncio.sleep(1)
-                    _LOGGER.warning("Failed to get status, retrying")
-                else:
-                    _LOGGER.error("Failed to get status", exc_info=True)
-                    return None
-            else:
-                break
+        try:
+            self._status = await self._request("status")
+        except (aiohttp.client_exceptions.ClientError, asyncio.TimeoutError):
+            _LOGGER.error("Failed to get status", exc_info=True)
+            return None
         return self._status
 
     async def fetch_heater_and_sensor_data(self):
