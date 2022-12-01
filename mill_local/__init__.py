@@ -2,11 +2,28 @@
 import asyncio
 import json
 import logging
+from enum import Enum
 
 import aiohttp.client_exceptions
 import async_timeout
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class OperationMode(Enum):
+    """Heater Operation Mode"""
+
+    # Follow the single set value, but not use any timers or weekly program
+    CONTROL_INDIVIDUALLY = "Control individually"
+
+    # The device is in off mode
+    OFF = "OFF"
+
+    # Follow the weekly program
+    WEEKLY_PROGRAM = "Weekly program"
+
+    # Follow the single set value, with timers enabled
+    INDEPENDENT_DEVICE = "Independent device"
 
 
 class Mill:
@@ -37,40 +54,22 @@ class Mill:
 
     async def set_target_temperature(self, target_temperature):
         """Set target temperature."""
-        payload = {
-            "type": "Normal",
-            "value": target_temperature,
-        }
-        with async_timeout.timeout(self._timeout):
-            async with self.websession.post(
-                f"{self.url}/set-temperature",
-                data=json.dumps(payload),
-            ) as response:
-                _LOGGER.debug("Heater response %s", response.status)
-                if response.status != 200:
-                    _LOGGER.error(
-                        "Failed to set target temperature %s %s",
-                        response.status,
-                        response.reason,
-                    )
-                return response.status
+        _LOGGER.debug("Setting target temperature to: '%s'", target_temperature)
+        return await self._post_request(
+            command="set-temperature",
+            payload={
+                "type": "Normal",
+                "value": target_temperature,
+            }
+        )
 
-    async def set_normal_operation_mode(self):
-        """Set target temperature."""
-        payload = {"mode": "Control individually"}
-        with async_timeout.timeout(self._timeout):
-            async with self.websession.post(
-                f"{self.url}/operation-mode",
-                payload=payload,
-            ) as response:
-                _LOGGER.debug("Heater response %s", response.status)
-                if response.status != 200:
-                    _LOGGER.error(
-                        "Failed to set target temperature %s %s",
-                        response.status,
-                        response.reason,
-                    )
-                return response.status
+    async def set_operation_mode_control_individually(self):
+        """Set control individually operation mode."""
+        return await self._set_operation_mode(OperationMode.CONTROL_INDIVIDUALLY)
+
+    async def set_operation_mode_off(self):
+        """Set control individually operation mode."""
+        return await self._set_operation_mode(OperationMode.OFF)
 
     async def connect(self):
         """Get heater status."""
@@ -79,7 +78,7 @@ class Mill:
     async def get_status(self):
         """Get heater status."""
         try:
-            self._status = await self._request("status")
+            self._status = await self._get_request("status")
         except (aiohttp.client_exceptions.ClientError, asyncio.TimeoutError):
             _LOGGER.error("Failed to get status", exc_info=True)
             return None
@@ -87,16 +86,48 @@ class Mill:
 
     async def fetch_heater_and_sensor_data(self):
         """Get heater status."""
-        return await self._request("control-status")
+        return await self._get_request("control-status")
 
-    async def _request(self, command):
+    async def _set_operation_mode(self, mode: OperationMode):
+        """Set heater operation mode."""
+        _LOGGER.debug("Setting operation mode to: '%s'", mode.value)
+        return await self._post_request(command="operation-mode", payload={"mode": mode.value})
+
+    async def _post_request(self, command: str, payload: dict):
+        """HTTP POST request to Mill Local Api."""
+        with async_timeout.timeout(self._timeout):
+            async with self.websession.post(
+                    url=f"{self.url}/{command}",
+                    data=json.dumps(payload),
+            ) as response:
+                _LOGGER.debug("POST '%s' response status: %s", command, response.status)
+                res = await response.json()
+                if response.status != 200 or res["status"] != "ok":
+                    _LOGGER.error(
+                        "POST '%s' failed with result.status: %s, response.status: %s, response.reason: %s",
+                        command,
+                        res,
+                        response.status,
+                        response.reason,
+                    )
+                return response.status
+
+    async def _get_request(self, command: str):
+        """HTTP GET request to Mill Local Api."""
         with async_timeout.timeout(self._timeout):
             async with self.websession.get(
-                f"{self.url}/{command}",
+                    url=f"{self.url}/{command}",
                     raise_for_status=True
             ) as response:
+                _LOGGER.debug("GET '%s' response status: %s", command, response.status)
                 res = await response.json()
-                if res["status"] != "ok":
-                    _LOGGER.error("Request %s failed: %s", command, res)
+                if response.status != 200 or res["status"] != "ok":
+                    _LOGGER.error(
+                        "GET '%s' failed with result.status: %s, response.status: %s, response.reason: %s",
+                        command,
+                        res,
+                        response.status,
+                        response.reason,
+                    )
                     return None
                 return res
