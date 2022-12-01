@@ -39,17 +39,17 @@ class Mill:
 
     @property
     def version(self):
-        """Return version."""
+        """Return the API version."""
         return self._status.get("version", "")
 
     @property
     def name(self):
-        """Return name."""
+        """Return heater name."""
         return self._status.get("name", "")
 
     @property
     def mac_address(self):
-        """Return mac address."""
+        """Return heater MAC address."""
         return self._status.get("mac_address")
 
     async def set_target_temperature(self, target_temperature):
@@ -64,11 +64,11 @@ class Mill:
         )
 
     async def set_operation_mode_control_individually(self):
-        """Set control individually operation mode."""
+        """Set operation mode to 'control individually'."""
         return await self._set_operation_mode(OperationMode.CONTROL_INDIVIDUALLY)
 
     async def set_operation_mode_off(self):
-        """Set control individually operation mode."""
+        """Set operation mode to 'off'."""
         return await self._set_operation_mode(OperationMode.OFF)
 
     async def connect(self):
@@ -76,7 +76,7 @@ class Mill:
         return await self.get_status()
 
     async def get_status(self):
-        """Get heater status."""
+        """Get summary of the heater device information."""
         try:
             self._status = await self._get_request("status")
         except (aiohttp.client_exceptions.ClientError, asyncio.TimeoutError):
@@ -85,7 +85,7 @@ class Mill:
         return self._status
 
     async def fetch_heater_and_sensor_data(self):
-        """Get heater status."""
+        """Get current heater state and control status."""
         return await self._get_request("control-status")
 
     async def _set_operation_mode(self, mode: OperationMode):
