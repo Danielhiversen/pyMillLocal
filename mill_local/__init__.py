@@ -52,10 +52,10 @@ class Mill:
         """Return heater MAC address."""
         return self._status.get("mac_address")
 
-    async def set_target_temperature(self, target_temperature):
+    async def set_target_temperature(self, target_temperature) -> None:
         """Set target temperature."""
         _LOGGER.debug("Setting target temperature to: '%s'", target_temperature)
-        return await self._post_request(
+        await self._post_request(
             command="set-temperature",
             payload={
                 "type": "Normal",
@@ -67,9 +67,9 @@ class Mill:
         """Set operation mode to 'control individually'."""
         return await self._set_operation_mode(OperationMode.CONTROL_INDIVIDUALLY)
 
-    async def set_operation_mode_off(self):
+    async def set_operation_mode_off(self) -> None:
         """Set operation mode to 'off'."""
-        return await self._set_operation_mode(OperationMode.OFF)
+        await self._set_operation_mode(OperationMode.OFF)
 
     async def connect(self):
         """Get heater status."""
@@ -88,12 +88,12 @@ class Mill:
         """Get current heater state and control status."""
         return await self._get_request("control-status")
 
-    async def _set_operation_mode(self, mode: OperationMode):
+    async def _set_operation_mode(self, mode: OperationMode) -> None:
         """Set heater operation mode."""
         _LOGGER.debug("Setting operation mode to: '%s'", mode.value)
-        return await self._post_request(command="operation-mode", payload={"mode": mode.value})
+        await self._post_request(command="operation-mode", payload={"mode": mode.value})
 
-    async def _post_request(self, command: str, payload: dict):
+    async def _post_request(self, command: str, payload: dict) -> None:
         """HTTP POST request to Mill Local Api."""
         with async_timeout.timeout(self._timeout):
             async with self.websession.post(
@@ -110,7 +110,6 @@ class Mill:
                         response.status,
                         response.reason,
                     )
-                return response.status
 
     async def _get_request(self, command: str):
         """HTTP GET request to Mill Local Api."""
