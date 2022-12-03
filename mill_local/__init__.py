@@ -106,7 +106,7 @@ class Mill:
                     _LOGGER.error(
                         "POST '%s' failed with result.status: %s, response.status: %s, response.reason: %s",
                         command,
-                        res,
+                        res["status"],
                         response.status,
                         response.reason,
                     )
@@ -125,7 +125,7 @@ class Mill:
                     _LOGGER.error(
                         "GET '%s' failed with result.status: %s, response.status: %s, response.reason: %s",
                         command,
-                        res,
+                        res["status"],
                         response.status,
                         response.reason,
                     )
