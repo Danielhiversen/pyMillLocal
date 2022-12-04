@@ -115,7 +115,7 @@ class Mill:
                 except aiohttp.client_exceptions.ClientError:
                     _LOGGER.error("POST '%s' failed to parse json response", exc_info=True)
 
-    async def _get_request(self, command: str):
+    async def _get_request(self, command: str) -> dict | None:
         """HTTP GET request to Mill Local Api."""
         with async_timeout.timeout(self._timeout):
             async with self.websession.get(
