@@ -121,7 +121,7 @@ class Mill:
                         )
                         return
                 except aiohttp.client_exceptions.ClientError:
-                    _LOGGER.error("POST '%s' failed to parse json response", exc_info=True)
+                    _LOGGER.error("POST '%s' failed to parse json response", command, exc_info=True)
                     return
 
                 _LOGGER.debug("POST '%s' response status: %s", command, response.status)
