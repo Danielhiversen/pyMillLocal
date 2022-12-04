@@ -100,11 +100,18 @@ class Mill:
                     url=f"{self.url}/{command}",
                     data=json.dumps(payload),
             ) as response:
-                _LOGGER.debug("POST '%s' response status: %s", command, response.status)
+                if response.status != 200:
+                    _LOGGER.error(
+                        "POST '%s' failed with response.status: %s and response.reason: %s",
+                        command,
+                        response.status,
+                        response.reason,
+                    )
+                    return
+
                 try:
                     res = await response.json()
-
-                    if response.status != 200 or res["status"] != "ok":
+                    if res["status"] != "ok":
                         _LOGGER.error(
                             "POST '%s' failed with result.status: %s, response.status: %s, response.reason: %s",
                             command,
@@ -112,8 +119,12 @@ class Mill:
                             response.status,
                             response.reason,
                         )
+                        return
                 except aiohttp.client_exceptions.ClientError:
                     _LOGGER.error("POST '%s' failed to parse json response", exc_info=True)
+                    return
+
+                _LOGGER.debug("POST '%s' response status: %s", command, response.status)
 
     async def _get_request(self, command: str) -> dict | None:
         """HTTP GET request to Mill Local Api."""
