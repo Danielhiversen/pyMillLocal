@@ -1,0 +1,13 @@
+{
+  "ambient_temperature": 14.9851131439209,
+  "current_power": 336,
+  "control_signal": 48,
+  "lock_active": "No lock",
+  "open_window_active_now": "Enabled not active now",
+  "raw_ambient_temperature": 14.9851131439209,
+  "set_temperature": 15,
+  "switched_on": false,
+  "connected_to_cloud": true,
+  "operation_mode": "Control individually",
+  "status": "ok"
+}
