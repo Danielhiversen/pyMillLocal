@@ -29,7 +29,7 @@ class OperationMode(Enum):
 class Mill:
     """Mill data handler."""
 
-    def __init__(self, device_ip: str, websession: ClientSession, timeout=15: int) -> None:
+    def __init__(self, device_ip: str, websession: ClientSession, timeout: int = 15) -> None:
         """Init Mill data handler."""
         self.device_ip = device_ip.replace("http://", "").replace("/", "").strip()
         self.websession = websession
