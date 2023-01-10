@@ -2,6 +2,7 @@
 import json
 import logging
 from enum import Enum
+from typing import Union
 
 import aiohttp.client_exceptions
 from aiohttp import ClientSession
@@ -48,7 +49,7 @@ class Mill:
         return self._status.get("name", "")
 
     @property
-    def mac_address(self) -> str | None:
+    def mac_address(self) -> Union[str, None]:
         """Return heater MAC address."""
         return self._status.get("mac_address")
 
@@ -115,7 +116,7 @@ class Mill:
                     )
                     raise
 
-    async def _get_request(self, command: str) -> dict | None:
+    async def _get_request(self, command: str) -> Union[dict, None]:
         """HTTP GET request to Mill Local Api."""
         async with timeout(self._timeout_seconds):
             async with self.websession.get(
