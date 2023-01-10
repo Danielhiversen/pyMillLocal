@@ -25,7 +25,7 @@ jobs:
         with:
           path: ~/.cache/pip
           key: pip_cache
-      - name: Install depencency
+      - name: Install dependencies
         run: |
             pip install dlint flake8 flake8-bandit flake8-bugbear flake8-deprecated flake8-executable isort pylint
             pip install -r requirements.txt
@@ -53,10 +53,14 @@ jobs:
             git push
       - name: Flake8 Code Linter
         run: |
-            flake8 $SRC_FOLDER --max-line-length=120 
+            flake8 $SRC_FOLDER --max-line-length=120
       - name: isort
         run: |
             isort **/*.py
       - name: Pylint Code Linter
         run: |
             pylint --disable=C,R  --enable=unidiomatic-typecheck $SRC_FOLDER
+      - name: Run tests
+        run: |
+          pip install -r requirements.txt
+          pytest -v -p no:logging -s
