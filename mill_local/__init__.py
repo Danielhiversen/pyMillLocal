@@ -29,12 +29,12 @@ class OperationMode(Enum):
 class Mill:
     """Mill data handler."""
 
-    def __init__(self, device_ip: str, websession: ClientSession, timeout: int = 15) -> None:
+    def __init__(self, device_ip: str, websession: ClientSession, timeout_seconds: int = 15) -> None:
         """Init Mill data handler."""
         self.device_ip = device_ip.replace("http://", "").replace("/", "").strip()
         self.websession = websession
         self.url = "http://" + self.device_ip
-        self._timeout = timeout
+        self._timeout_seconds = timeout_seconds
         self._status = {}
 
     @property
@@ -91,7 +91,7 @@ class Mill:
 
     async def _post_request(self, command: str, payload: dict) -> None:
         """HTTP POST request to Mill Local Api."""
-        async with timeout(self._timeout):
+        async with timeout(self._timeout_seconds):
             async with self.websession.post(
                     url=f"{self.url}/{command}",
                     data=json.dumps(payload)
@@ -117,7 +117,7 @@ class Mill:
 
     async def _get_request(self, command: str) -> dict | None:
         """HTTP GET request to Mill Local Api."""
-        async with timeout(self._timeout):
+        async with timeout(self._timeout_seconds):
             async with self.websession.get(
                     url=f"{self.url}/{command}"
             ) as response:

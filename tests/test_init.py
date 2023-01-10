@@ -18,7 +18,7 @@ async def test_init_when_websession_is_present(client_session):
     assert mill.device_ip == device_ip
     assert mill.websession is not None
     assert mill.url == local_api_url
-    assert mill._timeout == 15
+    assert mill._timeout_seconds == 15
     assert mill.name == ""
     assert mill.version == ""
     assert mill.mac_address is None
