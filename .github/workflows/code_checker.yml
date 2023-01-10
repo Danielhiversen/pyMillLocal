@@ -62,5 +62,5 @@ jobs:
             pylint --disable=C,R  --enable=unidiomatic-typecheck $SRC_FOLDER
       - name: Run tests
         run: |
-          pip install -r requirements.txt
+          pip install -r requirements-test.txt
           pytest -v -p no:logging -s
