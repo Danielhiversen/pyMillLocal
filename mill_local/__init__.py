@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class OperationMode(Enum):
-    """Heater Operation Mode"""
+    """Heater Operation Mode."""
 
     # Follow the single set value, but not use any timers or weekly program
     CONTROL_INDIVIDUALLY = "Control individually"
@@ -105,7 +105,7 @@ class Mill:
 
                 try:
                     response.raise_for_status()
-                except aiohttp.ClientResponseError as err:
+                except aiohttp.ClientResponseError:
                     _LOGGER.error(
                         "POST request to '%s' failed with status code: '%s (%s)' and status message: '%s'",
                         command,
@@ -117,7 +117,6 @@ class Mill:
 
     async def _get_request(self, command: str) -> dict | None:
         """HTTP GET request to Mill Local Api."""
-
         async with timeout(self._timeout):
             async with self.websession.get(
                     url=f"{self.url}/{command}"
