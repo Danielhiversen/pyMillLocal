@@ -15,7 +15,7 @@ setup(
     packages=["mill_local"],
     install_requires=install_requires,
     version="0.3.0",
-    description="A python3 library to communicate with Mill",
+    description="A python3 library to communicate with Mill heaters using local Gen 3 API",
     python_requires=">=3.8.0",
     author="Daniel Hjelseth Høyer",
     author_email="mail@dahoiv.net",
