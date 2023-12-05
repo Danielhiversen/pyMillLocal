@@ -26,6 +26,14 @@ class OperationMode(Enum):
     # Follow the single set value, with timers enabled
     INDEPENDENT_DEVICE = "Independent device"
 
+class OilHeaterPowerLevels(Enum):
+    """Heater power setting by percentage."""
+
+    HIGH = 100
+    MEDIUM = 60
+    LOW = 40
+    OFF = 0
+
 
 class Mill:
     """Mill data handler."""
@@ -141,3 +149,20 @@ class Mill:
                         json_response.get("status", "")  # Guard in case status property is missing in body
                     )
                     raise
+
+class MillOilHeater(Mill):
+    """Mill Oil Heater data handler."""
+    
+    async def set_heater_power(self, power: OilHeaterPowerLevels) -> None:
+        """Set oil oven heater power"""
+        _LOGGER.debug("Setting oil oven heater power to: '%s'", power.value)
+        await self._post_request(
+            command="oil-heater-power",
+            payload={
+                "heating_level_percentage": power.value,
+            }
+        )
+
+    async def fetch_heater_power_data(self) -> dict:
+        """Get current heater state and control status."""
+        return await self._get_request("oil-heater-power")

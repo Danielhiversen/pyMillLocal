@@ -45,6 +45,12 @@ def generic_status_ok_response():
     return load_fixture("generic_status_ok_response.json")
 
 
+@pytest.fixture(scope="session")
+def oil_heater_power_response():
+    """A generic response with status OK."""
+    return load_fixture("oil_heater_power_response.json")
+
+
 def load_fixture(name: str):
     """Load a fixture from disk."""
     path = pathlib.Path(__file__).parent / "fixtures" / name
