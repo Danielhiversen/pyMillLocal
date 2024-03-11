@@ -4,7 +4,7 @@ import json
 import pytest
 from aiohttp import ClientResponseError
 
-from mill_local import Mill, OperationMode
+from mill_local import Mill, MillOilHeater, OperationMode, OilHeaterPowerLevels
 
 device_ip = "192.168.2.123"
 local_api_url = f"http://{device_ip}"
@@ -108,6 +108,59 @@ async def test_set_target_temperature_when_error_raised(mocked_response, client_
                                                     "type": "Normal",
                                                     "value": 20.5
                                                 }))
+
+async def test_set_heater_power_when_successful(mocked_response, client_session,
+                                                      generic_status_ok_response):
+    """Test successful setting the device oil heater power."""
+    mill = MillOilHeater(device_ip, client_session)
+    mocked_response.post(f"{local_api_url}/oil-heater-power", status=200, payload=generic_status_ok_response)
+
+    returned_data = await mill.set_heater_power(OilHeaterPowerLevels.HIGH)
+    assert returned_data is None
+    mocked_response.assert_called_once_with(url=f"{local_api_url}/oil-heater-power",
+                                            method="POST",
+                                            data=json.dumps({
+                                                "heating_level_percentage": OilHeaterPowerLevels.HIGH.value,
+                                            }))
+
+
+async def test_set_heater_power_when_error_raised(mocked_response, client_session,
+                                                        generic_status_ok_response):
+    """Test error raised when setting the device oil heater power."""
+    mill = MillOilHeater(device_ip, client_session)
+    mocked_response.post(f"{local_api_url}/oil-heater-power", status=400)
+
+    with pytest.raises(ClientResponseError) as exp_400_info:
+        returned_data = await mill.set_heater_power(OilHeaterPowerLevels.HIGH)
+        assert exp_400_info.value.status == 400
+        assert returned_data is None
+        mocked_response.assert_called_once_with(url=f"{local_api_url}/oil-heater-power",
+                                                method="POST",
+                                                data=json.dumps({
+                                                    "heating_level_percentage": OilHeaterPowerLevels.HIGH.value,
+                                                }))
+
+
+async def test_fetch_heater_power_when_successful(mocked_response, client_session, oil_heater_power_response):
+    """Test successful reading heater and sensor data."""
+    mill = MillOilHeater(device_ip, client_session)
+    mocked_response.get(f"{local_api_url}/oil-heater-power", status=200, payload=oil_heater_power_response)
+
+    returned_data = await mill.fetch_heater_power_data()
+    assert returned_data is not None
+    assert len(returned_data.keys()) == 2
+    assert type(returned_data.get("value")) is int
+
+
+async def test_fetch_heater_power_when_error_raised(mocked_response, client_session, oil_heater_power_response):
+    """Test error raised when reading heater and sensor data and None returned."""
+    mill = MillOilHeater(device_ip, client_session)
+    mocked_response.get(f"{local_api_url}/oil-heater-power", status=400)
+
+    with pytest.raises(ClientResponseError) as exp_400_info:
+        returned_data = await mill.fetch_heater_power_data()
+        assert exp_400_info.value.status == 400
+        assert returned_data is None
 
 
 async def test_set_operation_mode_control_individually_when_successful(mocked_response, client_session,
