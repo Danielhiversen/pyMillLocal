@@ -26,6 +26,7 @@ class OperationMode(Enum):
     # Follow the single set value, with timers enabled
     INDEPENDENT_DEVICE = "Independent device"
 
+
 class OilHeaterPowerLevels(Enum):
     """Heater power setting by percentage."""
 
@@ -150,9 +151,10 @@ class Mill:
                     )
                     raise
 
+
 class MillOilHeater(Mill):
     """Mill Oil Heater data handler."""
-    
+
     async def set_heater_power(self, power: OilHeaterPowerLevels) -> None:
         """Set oil oven heater power"""
         _LOGGER.debug("Setting oil oven heater power to: '%s'", power.value)
