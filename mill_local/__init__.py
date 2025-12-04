@@ -77,6 +77,10 @@ class Mill:
         """Set operation mode to 'control individually'."""
         await self._set_operation_mode(OperationMode.CONTROL_INDIVIDUALLY)
 
+    async def set_operation_mode_weekly_program(self) -> None:
+        """Set operation mode to 'weekly program'."""
+        await self._set_operation_mode(OperationMode.WEEKLY_PROGRAM)
+
     async def set_operation_mode_off(self) -> None:
         """Set operation mode to 'off'."""
         await self._set_operation_mode(OperationMode.OFF)
