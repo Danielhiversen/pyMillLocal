@@ -10,8 +10,9 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.9"
-          - "3.10"
+          - "3.12"
+          - "3.13"
+          - "3.14"
     env:
       SRC_FOLDER: mill_local
     steps:
@@ -21,7 +22,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: pip_cache

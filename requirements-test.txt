@@ -1,3 +1,2 @@
-aioresponses
 pytest
 pytest-asyncio

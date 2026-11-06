@@ -1,12 +1,12 @@
 """Local support for Mill wifi-enabled home heaters."""
+
+import asyncio
 import json
 import logging
 from enum import Enum
-from typing import Union
 
 import aiohttp.client_exceptions
 from aiohttp import ClientSession
-from async_timeout import timeout
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +39,9 @@ class OilHeaterPowerLevels(Enum):
 class Mill:
     """Mill data handler."""
 
-    def __init__(self, device_ip: str, websession: ClientSession, timeout_seconds: int = 15) -> None:
+    def __init__(
+        self, device_ip: str, websession: ClientSession, timeout_seconds: int = 15
+    ) -> None:
         """Init Mill data handler."""
         self.device_ip = device_ip.replace("http://", "").replace("/", "").strip()
         self.websession = websession
@@ -58,7 +60,7 @@ class Mill:
         return self._status.get("name", "")
 
     @property
-    def mac_address(self) -> Union[str, None]:
+    def mac_address(self) -> str | None:
         """Return heater MAC address."""
         return self._status.get("mac_address")
 
@@ -70,7 +72,7 @@ class Mill:
             payload={
                 "type": "Normal",
                 "value": target_temperature,
-            }
+            },
         )
 
     async def set_operation_mode_control_individually(self) -> None:
@@ -98,6 +100,17 @@ class Mill:
         """Get current heater state and control status."""
         return await self._get_request("control-status")
 
+    async def fetch_temperature_calibration_offset(self) -> dict:
+        """Get the current temperature calibration offset."""
+        return await self._get_request("temperature-calibration-offset")
+
+    async def set_temperature_calibration_offset(self, offset: float) -> None:
+        """Set the temperature calibration offset."""
+        _LOGGER.debug("Setting temperature calibration offset to: '%s'", offset)
+        await self._post_request(
+            command="temperature-calibration-offset", payload={"value": offset}
+        )
+
     async def _set_operation_mode(self, mode: OperationMode) -> None:
         """Set heater operation mode."""
         _LOGGER.debug("Setting operation mode to: '%s'", mode.value)
@@ -105,10 +118,9 @@ class Mill:
 
     async def _post_request(self, command: str, payload: dict) -> None:
         """HTTP POST request to Mill Local Api."""
-        async with timeout(self._timeout_seconds):
+        async with asyncio.timeout(self._timeout_seconds):
             async with self.websession.post(
-                    url=f"{self.url}/{command}",
-                    data=json.dumps(payload)
+                url=f"{self.url}/{command}", data=json.dumps(payload)
             ) as response:
                 # Since body is not available when using raise_for_status=True, we use raise_for_status()
                 json_response = await response.json()
@@ -125,16 +137,16 @@ class Mill:
                         command,
                         response.status,
                         response.reason,
-                        json_response.get("status", "")  # Guard in case status property is missing in body
+                        json_response.get(
+                            "status", ""
+                        ),  # Guard in case status property is missing in body
                     )
                     raise
 
-    async def _get_request(self, command: str) -> Union[dict, None]:
+    async def _get_request(self, command: str) -> dict | None:
         """HTTP GET request to Mill Local Api."""
-        async with timeout(self._timeout_seconds):
-            async with self.websession.get(
-                    url=f"{self.url}/{command}"
-            ) as response:
+        async with asyncio.timeout(self._timeout_seconds):
+            async with self.websession.get(url=f"{self.url}/{command}") as response:
                 # Since body is not available when using raise_for_status=True, we use raise_for_status()
                 json_response = await response.json()
 
@@ -151,7 +163,9 @@ class Mill:
                         command,
                         response.status,
                         response.reason,
-                        json_response.get("status", "")  # Guard in case status property is missing in body
+                        json_response.get(
+                            "status", ""
+                        ),  # Guard in case status property is missing in body
                     )
                     raise
 
@@ -166,7 +180,7 @@ class MillOilHeater(Mill):
             command="oil-heater-power",
             payload={
                 "heating_level_percentage": power.value,
-            }
+            },
         )
 
     async def fetch_heater_power_data(self) -> dict:

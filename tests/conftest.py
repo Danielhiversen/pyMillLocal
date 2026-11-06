@@ -1,18 +1,75 @@
-"""Test helpers """
+"""Test helpers"""
 
 import json
 import pathlib
+from http import HTTPStatus
+from unittest.mock import MagicMock, patch
 
 import pytest
-from aiohttp import ClientSession
-from aioresponses import aioresponses
+from aiohttp import ClientResponseError, ClientSession
 
 
-# See https://github.com/pnuckowski/aioresponses/issues/218
+class FakeResponse:
+    """Minimal stand-in for aiohttp.ClientResponse."""
+
+    def __init__(self, method, url, status, body):
+        self.status = status
+        self.reason = HTTPStatus(status).phrase
+        self._body = body
+        self._request_info = MagicMock(real_url=url, method=method)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc_info):
+        return False
+
+    async def json(self):
+        return json.loads(self._body) if self._body else None
+
+    def raise_for_status(self):
+        if self.status >= 400:
+            raise ClientResponseError(
+                self._request_info, (), status=self.status, message=self.reason
+            )
+
+
+class MockedSession:
+    """Register canned responses and record calls made through ClientSession.get/post."""
+
+    def __init__(self):
+        self._responses = {}
+        self.calls = []
+
+    def get(self, url, status=200, payload=None, body=""):
+        self._register("GET", url, status, payload, body)
+
+    def post(self, url, status=200, payload=None, body=""):
+        self._register("POST", url, status, payload, body)
+
+    def assert_called_once_with(self, **expected):
+        assert self.calls == [expected]
+
+    def _register(self, method, url, status, payload, body):
+        if payload is not None:
+            body = json.dumps(payload)
+        self._responses.setdefault((method, url), []).append((status, body))
+
+    def _handle(self, method, **kwargs):
+        self.calls.append({"method": method, **kwargs})
+        status, body = self._responses[(method, kwargs["url"])].pop(0)
+        return FakeResponse(method, kwargs["url"], status, body)
+
+
 @pytest.fixture
 def mocked_response():
-    with aioresponses() as m:
-        yield m
+    mock = MockedSession()
+    with patch.object(
+        ClientSession, "get", lambda self, **kw: mock._handle("GET", **kw)
+    ), patch.object(
+        ClientSession, "post", lambda self, **kw: mock._handle("POST", **kw)
+    ):
+        yield mock
 
 
 @pytest.fixture(autouse=True)

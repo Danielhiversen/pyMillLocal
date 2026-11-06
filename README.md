@@ -17,6 +17,8 @@ These features are currently supported:
 - read detailed device state and control status (`GET /control-status`)
 - set target temperature for Normal type (`POST /set-temperature`)
 - set operation mode to `Control individually` and `Off` (`POST /operation-mode`)
+- read temperature calibration offset (`GET /temperature-calibration-offset`)
+- set temperature calibration offset (`POST /temperature-calibration-offset`)
 
 ## Install
 
