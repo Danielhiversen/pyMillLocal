@@ -19,20 +19,10 @@ These features are currently supported:
 - set operation mode to `Control individually` and `Off` (`POST /operation-mode`)
 - read temperature calibration offset (`GET /temperature-calibration-offset`)
 - set temperature calibration offset (`POST /temperature-calibration-offset`)
-- read and set child lock (`GET` / `POST /child-lock`)
-- read and set commercial lock (`GET` / `POST /commercial-lock`)
-
-### Child and commercial locks
-
-`await mill.fetch_child_lock()` and `await mill.fetch_commercial_lock()` return
-the respective device response, including its boolean `value` and `status`.
-Use `await mill.set_child_lock(True)` or
-`await mill.set_commercial_lock(True)` to enable a lock, and `False` to disable
-it. Setters require a Python boolean; strings and integers are rejected before
-any network request. Each call addresses only its named endpoint.
-
-These are device-button locks, not API authentication or transport security.
-The separate `/commercial-lock-customization` endpoint is not covered here.
+- read child lock (`GET /child-lock`)
+- set child lock (`POST /child-lock`)
+- read commercial lock (`GET /commercial-lock`)
+- set commercial lock (`POST /commercial-lock`)
 
 ## Install
 
