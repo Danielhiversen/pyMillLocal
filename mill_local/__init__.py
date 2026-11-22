@@ -104,6 +104,26 @@ class Mill:
         """Get the current temperature calibration offset."""
         return await self._get_request("temperature-calibration-offset")
 
+    async def fetch_child_lock(self) -> dict:
+        """Get the child-lock status."""
+        return await self._get_request("child-lock")
+
+    async def set_child_lock(self, enabled: bool) -> None:
+        """Enable or disable the child lock."""
+        if not isinstance(enabled, bool):
+            raise ValueError("Child-lock state must be a boolean")
+        await self._post_request(command="child-lock", payload={"value": enabled})
+
+    async def fetch_commercial_lock(self) -> dict:
+        """Get the commercial-lock status."""
+        return await self._get_request("commercial-lock")
+
+    async def set_commercial_lock(self, enabled: bool) -> None:
+        """Enable or disable the commercial lock."""
+        if not isinstance(enabled, bool):
+            raise ValueError("Commercial-lock state must be a boolean")
+        await self._post_request(command="commercial-lock", payload={"value": enabled})
+
     async def set_temperature_calibration_offset(self, offset: float) -> None:
         """Set the temperature calibration offset."""
         _LOGGER.debug("Setting temperature calibration offset to: '%s'", offset)
