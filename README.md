@@ -19,6 +19,8 @@ These features are currently supported:
 - set operation mode to `Control individually` and `Off` (`POST /operation-mode`)
 - read temperature calibration offset (`GET /temperature-calibration-offset`)
 - set temperature calibration offset (`POST /temperature-calibration-offset`)
+- read limited heating power (`GET /limited-heating-power`)
+- set limited heating power (`POST /limited-heating-power`)
 
 ## Install
 

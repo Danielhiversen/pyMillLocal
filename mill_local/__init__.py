@@ -104,6 +104,25 @@ class Mill:
         """Get the current temperature calibration offset."""
         return await self._get_request("temperature-calibration-offset")
 
+    async def fetch_limited_heating_power(self) -> dict:
+        """Read the percentage power limit on supported panel/storage heaters."""
+        return await self._get_request("limited-heating-power")
+
+    async def set_limited_heating_power(self, percentage: int) -> None:
+        """Set a panel/storage heater's power limit to 10–100 percent.
+
+        This does not change the target temperature or operation mode. It is
+        separate from the rated wattage and oil-heater power levels.
+        """
+        if isinstance(percentage, bool) or not isinstance(percentage, int):
+            raise ValueError("Heating power limit must be an integer percentage")
+        if not 10 <= percentage <= 100:
+            raise ValueError("Heating power limit must be between 10 and 100 percent")
+        await self._post_request(
+            command="limited-heating-power",
+            payload={"limited_heating_power": percentage},
+        )
+
     async def set_temperature_calibration_offset(self, offset: float) -> None:
         """Set the temperature calibration offset."""
         _LOGGER.debug("Setting temperature calibration offset to: '%s'", offset)
