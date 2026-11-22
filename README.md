@@ -19,6 +19,19 @@ These features are currently supported:
 - set operation mode to `Control individually` and `Off` (`POST /operation-mode`)
 - read temperature calibration offset (`GET /temperature-calibration-offset`)
 - set temperature calibration offset (`POST /temperature-calibration-offset`)
+- read and set a panel/storage heater's percentage power limit
+  (`GET` / `POST /limited-heating-power`)
+
+### Panel/storage heater power limit
+
+`await mill.fetch_limited_heating_power()` returns the device response, including
+`limited_heating_power`. `await mill.set_limited_heating_power(65)` sets a whole
+percentage from 10 through 100, inclusive; the API is not restricted to 10% steps.
+These calls require a heater that supports this endpoint. They do not change the
+target temperature, operation mode, rated wattage, or oil-heater power level.
+For a 700 W heater, 65% corresponds to a calculated 455 W allowance, not a
+measurement or guarantee of instantaneous input power. Read back the setting
+and use independent circuit measurements when coordinating shared loads.
 
 ## Install
 
