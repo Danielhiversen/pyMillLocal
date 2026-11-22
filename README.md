@@ -19,6 +19,10 @@ These features are currently supported:
 - set operation mode to `Control individually` and `Off` (`POST /operation-mode`)
 - read temperature calibration offset (`GET /temperature-calibration-offset`)
 - set temperature calibration offset (`POST /temperature-calibration-offset`)
+- read child lock (`GET /child-lock`)
+- set child lock (`POST /child-lock`)
+- read commercial lock (`GET /commercial-lock`)
+- set commercial lock (`POST /commercial-lock`)
 
 ## Install
 
